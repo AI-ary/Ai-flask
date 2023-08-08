@@ -8,7 +8,8 @@ from controller import bp
 # OpenAI API Key 설정
 openai.api_key = os.getenv('OPEN_AI_KEY')
 
-DRAW_CUTE_CHARACTER = " Draw it as a simple and cute character"
+DRAW_CUTE_CHARACTER = "Draw it as a clean, simple and cute character, ultra-detailed, 8k, " \
+                      "realistic drawing, digital art"
 
 
 @bp.route('/api/dalle', methods=['POST'])
