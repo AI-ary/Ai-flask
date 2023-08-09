@@ -1,40 +1,26 @@
-from flask import Flask, request, jsonify
-import openai
-import os
-from googletrans import Translator
+from flask import Flask
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
+from config import databaseConfig
 
-# OpenAI API Key 설정
-openai.api_key = os.getenv('OPEN_AI_KEY')
-
-DRAW_CUTE_CHARACTER = " Draw it as a simple and cute character"
+db = SQLAlchemy()
+migrate = Migrate()
 
 
-@app.route('/api/dalle', methods=['POST'])
-def generate_image():
-    # POST 요청으로 받은 JSON 데이터에서 'story' 키의 값을 가져옵니다.
-    json_data = request.json
-    story = json_data.get("story")
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(databaseConfig)
 
-    # 번역기를 만든다.
-    translator = Translator()
-    # 영어로 번역
-    story_en = translator.translate(story + DRAW_CUTE_CHARACTER, 'en').text
+    # CORS
 
-    # OpenAI API를 사용하여 이미지 생성 요청
-    response = openai.Image.create(
-        prompt=story_en,
-        n=4,
-        size="1024x1024"
-    )
+    # ORM
+    db.init_app(app)
+    migrate.init_app(app, db)
 
-    # 생성된 이미지의 URL을 추출합니다.
-    image_urls = [data['url'] for data in response['data']]
+    # 블루프린트
+    from controller import DalleController, KonlpyController
+    app.register_blueprint(DalleController.bp, name='dalle')
+    app.register_blueprint(KonlpyController.bp, name='konlpy')
 
-    # 이미지 URL을 JSON 형태로 응답합니다.
-    return jsonify({'image_url': image_urls})
-
-
-if __name__ == '__main__':
-    app.run()
+    return app
