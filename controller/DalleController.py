@@ -1,9 +1,8 @@
-from flask import request, jsonify
-import time
+from flask import request
 import openai
 import os
 from controller import bp
-from tasks import make_image
+from tasks import celery
 
 # OpenAI API Key 설정
 openai.api_key = os.getenv('OPEN_AI_KEY')
@@ -11,19 +10,29 @@ openai.api_key = os.getenv('OPEN_AI_KEY')
 
 @bp.route('/api/dalle', methods=['POST'])
 def generate_image():
-    global image_urls
     json_data = request.json
     story = json_data.get("story")
-    image_data = make_image.delay(story, os.getenv('OPEN_AI_KEY'))
 
-    while True:
-        if not image_data.ready():
-            time.sleep(5)
-            print("    delay...    ")
-            continue
-        else:
-            image_results = image_data.get()  # 결과를 가져옴
-            image_urls = [data['url'] for data in image_results['data']]
-            break
-    # 이미지 URL을 JSON 형태로 응답합니다.
-    return jsonify({'image_urls': image_urls})
+    task = celery.send_task('dalle2_ai', kwargs={
+        'story': story, 'api_key': openai.api_key})
+
+    task_id = task.id
+    return {"task_id": task_id}
+
+
+@bp.route('/api/dalle/task', methods=['POST'])
+def get_task_status():
+    json_data = request.json
+    task_id = json_data.get("task_id")
+    status = celery.AsyncResult(task_id, app=celery)
+
+    return {"status": str(status.state)}
+
+
+@bp.route('/api/dalle/result', methods=['POST'])
+def get_task_result():
+    json_data = request.json
+    task_id = json_data.get("task_id")
+    image_results = celery.AsyncResult(task_id).result
+    image_urls = [data['url'] for data in image_results['data']]
+    return image_urls
