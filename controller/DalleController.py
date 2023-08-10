@@ -12,10 +12,8 @@ openai.api_key = os.getenv('OPEN_AI_KEY')
 def generate_image():
     json_data = request.json
     story = json_data.get("story")
-
     task = celery.send_task('dalle2_ai', kwargs={
         'story': story, 'api_key': openai.api_key})
-
     task_id = task.id
     return {"task_id": task_id}
 
@@ -25,7 +23,6 @@ def get_task_status():
     json_data = request.json
     task_id = json_data.get("task_id")
     status = celery.AsyncResult(task_id, app=celery)
-
     return {"status": str(status.state)}
 
 
