@@ -10,7 +10,7 @@ from tasks import decode
 def get_keyword():
     json_data = request.json
     contents = json_data.get('contents')
-    diary_keyword = decode(contents)
+    diary_keyword = decode.delay(contents)
 
     keyword_images_dict = {}
     while True:
