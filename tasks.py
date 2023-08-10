@@ -8,12 +8,12 @@ from konlpy.tag import Kkma
 
 celery = Celery('tasks',
                 broker='pyamqp://guest:guest@rabbit:5672/',
-                backend='rpc://',
+                backend='rpc://guest:guest@rabbit:5672/',
                 include=["tasks"])
 
 
 # 자연어 처리 AI
-@celery.task
+@celery.task(name='konlpy_ai')
 def decode(contents):
     analyzer = Kkma()
     nouns = analyzer.nouns(contents)
@@ -25,7 +25,7 @@ DRAW_CUTE_CHARACTER = "Draw it as a clean, simple and cute character, ultra-deta
                       "realistic drawing, digital art"
 
 
-@celery.task
+@celery.task(name='dalle2_ai')
 def make_image(story, api_key):
     openai.api_key = api_key  # 전달된 API 키 설정
     translator = Translator()
