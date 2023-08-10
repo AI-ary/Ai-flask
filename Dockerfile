@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.10
 
 # python .pyc 파일 생성하지 않도록 / 로그가 버퍼링없이 즉각 출력되도록
 ENV PYTHONDONTWRITEBYTECODE 1
