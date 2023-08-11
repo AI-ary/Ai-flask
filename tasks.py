@@ -3,12 +3,16 @@ from celery import Celery
 from googletrans import Translator
 from konlpy.tag import Kkma
 
+from config.databaseConfig import DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_SCHEMA
+
 # app = Celery('config',  backend='rpc://', broker='amqp://gdiary:gdiary123@gdiary_host/gdiary_host', include=['text.views'])
 # celery = Celery('tasks', backend='rpc://', broker='pyamqp://guest@gd_rabbitmq//', include=["tasks"])
 
 celery = Celery('tasks',
                 broker='pyamqp://guest:guest@rabbit:5672/',
-                backend='rpc://guest:guest@rabbit:5672/',
+                backend='db+mysql://{}:{}@{}:{}/{}?charset=utf8'
+                .format(DB_USERNAME, DB_PASSWORD,
+                        DB_HOST, DB_PORT, DB_SCHEMA),
                 include=["tasks"])
 
 
