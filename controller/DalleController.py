@@ -19,7 +19,7 @@ def generate_image():
 
 
 @bp.route('/api/dalle/task', methods=['POST'])
-def get_task_status():
+def get_dalle_status():
     json_data = request.json
     task_id = json_data.get("task_id")
     status = celery.AsyncResult(task_id, app=celery)
@@ -27,7 +27,7 @@ def get_task_status():
 
 
 @bp.route('/api/dalle/result', methods=['POST'])
-def get_task_result():
+def get_dalle_result():
     json_data = request.json
     task_id = json_data.get("task_id")
     image_results = celery.AsyncResult(task_id).result
