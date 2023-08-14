@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 from config import databaseConfig
 from config.databaseConfig import DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_SCHEMA
@@ -14,6 +15,7 @@ def create_app():
     app.config.from_object(databaseConfig)
 
     # CORS
+    CORS(app, resources={r'*': {'origins': '*'}})
 
     # ORM
     db.init_app(app)
@@ -23,13 +25,5 @@ def create_app():
     from controller import DalleController, KonlpyController
     app.register_blueprint(DalleController.bp, name='dalle')
     app.register_blueprint(KonlpyController.bp, name='konlpy')
-
-    # rabbitmq
-    app.config.update(
-        broker='pyamqp://guest:guest@rabbit:5672/',
-        backend='db+mysql://{}:{}@{}:{}/{}?charset=utf8'
-                .format(DB_USERNAME, DB_PASSWORD,
-                        DB_HOST, DB_PORT, DB_SCHEMA)
-    )
 
     return app
