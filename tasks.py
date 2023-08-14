@@ -10,10 +10,11 @@ from config.databaseConfig import DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB
 
 celery = Celery('tasks',
                 broker='pyamqp://guest:guest@rabbit:5672/',
-                backend='db+mysql://{}:{}@{}:{}/{}?charset=utf8'
-                .format(DB_USERNAME, DB_PASSWORD,
-                        DB_HOST, DB_PORT, DB_SCHEMA),
+                backend='redis://gd_ai_redis:6379/0',
                 include=["tasks"])
+
+# Celery 결과의 유효 기간을 설정합니다.
+celery.conf.result_expires = 300  # 결과가 5분(300초) 후에 만료됩니다.
 
 
 # 자연어 처리 AI
