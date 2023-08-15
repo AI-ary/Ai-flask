@@ -1,8 +1,10 @@
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 from config import databaseConfig
+from config.databaseConfig import DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_SCHEMA
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -13,6 +15,7 @@ def create_app():
     app.config.from_object(databaseConfig)
 
     # CORS
+    CORS(app, resources={r'*': {'origins': '*'}})
 
     # ORM
     db.init_app(app)
