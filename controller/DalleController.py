@@ -30,7 +30,7 @@ class GenerateImage(Resource):
     def post(self):
         """일기 내용을 요청시 task_id를 응답해 줍니다."""
         story = request.json.get("story")
-        task = celery.send_task('dalle2_ai', kwargs={'story': story, 'api_key': openai.api_key})
+        task = celery.send_task('dalle2_ai', kwargs={'story': story, 'api_key': openai.api_key}, queue='dalle_tasks')
         task_id = task.id
         return {"task_id": task_id}
 

@@ -25,8 +25,8 @@ class GenerateKeyword(Resource):
     @Konlpy.expect(input_story)
     @Konlpy.response(201, 'Success', output_task_id)
     def post(self):
-        contents = request.json.get('story')
-        task = celery.send_task('konlpy_ai', kwargs={'contents': contents})
+        story = request.json.get('story')
+        task = celery.send_task('konlpy_ai', kwargs={'story': story}, queue='konlpy_tasks')
         task_id = task.id
         return {"task_id": task_id}
 

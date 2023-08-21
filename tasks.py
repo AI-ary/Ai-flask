@@ -2,6 +2,7 @@ import openai
 from celery import Celery
 from googletrans import Translator
 from konlpy.tag import Kkma
+from kombu import Queue
 
 celery = Celery('tasks',
                 broker='pyamqp://guest:guest@rabbit:5672/',
@@ -10,15 +11,19 @@ celery = Celery('tasks',
 
 # Celery 결과의 유효 기간을 설정합니다.
 celery.conf.result_expires = 300  # 결과가 5분(300초) 후에 만료됩니다.
+celery.conf.task_queues = (
+    Queue('dalle_tasks', routing_key='dalle.#'),
+    Queue('konlpy_tasks', routing_key='konlpy.#'),
+)
 
 
 # worker 개수를 설정하지 않은 경우에는 기본적으로 사용 가능한 CPU 코어의 개수에 따라 worker가 생성됩니다.
 
 # 자연어 처리 AI
 @celery.task(name='konlpy_ai')
-def decode(contents):
+def decode(story):
     analyzer = Kkma()
-    nouns = analyzer.nouns(contents)
+    nouns = analyzer.nouns(story)
     return nouns
 
 
