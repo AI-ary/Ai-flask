@@ -35,7 +35,7 @@ class GenerateImage(Resource):
         return {"task_id": task_id}
 
 
-@Dalle.route('/task')
+@Dalle.route('/status')
 class GetDalleStatus(Resource):
     @Dalle.expect(input_task_id)
     @Dalle.response(200, 'Success', output_task_status)

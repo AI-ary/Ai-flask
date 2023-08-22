@@ -31,7 +31,7 @@ class GenerateKeyword(Resource):
         return {"task_id": task_id}
 
 
-@Konlpy.route('/task')
+@Konlpy.route('/status')
 class GetKonlpyStatus(Resource):
     @Konlpy.expect(input_task_id)
     @Konlpy.response(200, 'Success', output_task_status)
