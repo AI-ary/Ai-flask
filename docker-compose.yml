@@ -9,6 +9,7 @@ services:
     environment:
       FLASK_ENV: development
       FLASK_DEBUG: 1
+    command: gunicorn -w 2 -b 0:8000 wsgi:app
     restart: unless-stopped
     networks:
       - gd
@@ -21,8 +22,8 @@ services:
     command: rabbitmq-server
     restart: unless-stopped
     environment:
-      - RABBITMQ_USER=guest
-      - RABBITMQ_PASSWORD=guest
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
     ports:
       - "5672:5672" # Default Port
       - "15672:15672" # For UI
