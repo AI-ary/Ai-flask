@@ -2,9 +2,9 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_restx import Api
 
 from config import databaseConfig
-from config.databaseConfig import DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_SCHEMA
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -21,9 +21,20 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # 블루프린트
+    # API Swagger
+    api = Api(
+        app,
+        version='v2',
+        title="Aiary Project's AI API Server",
+        description="AI API Server Swagger",
+        doc="/swagger",
+        contact="Aiary",
+        license="MIT",
+    )
+
+    # Controller
     from controller import DalleController, KonlpyController
-    app.register_blueprint(DalleController.bp, name='dalle')
-    app.register_blueprint(KonlpyController.bp, name='konlpy')
+    api.add_namespace(DalleController.Dalle, "/api/dalle")
+    api.add_namespace(KonlpyController.Konlpy, "/api/konlpy")
 
     return app
