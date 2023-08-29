@@ -34,7 +34,7 @@ def create_app():
 
     # Controller
     from controller import DalleController, KonlpyController
-    api.add_namespace(DalleController.Dalle, "/api/dalle")
-    api.add_namespace(KonlpyController.Konlpy, "/api/konlpy")
+    api.add_namespace(DalleController.Dalle, "/ai_api/dalle")
+    api.add_namespace(KonlpyController.Konlpy, "/ai_api/konlpy")
 
     return app
