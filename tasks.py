@@ -6,7 +6,7 @@ from kombu import Queue
 
 celery = Celery('tasks',
                 broker='pyamqp://guest:guest@rabbit:5672/',
-                backend='redis://gd_ai_redis:6379/0',
+                backend='redis://ai_redis:6000/0',
                 include=["tasks"])
 
 # Celery 결과의 유효 기간을 설정합니다.
