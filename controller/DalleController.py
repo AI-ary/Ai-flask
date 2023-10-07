@@ -10,7 +10,7 @@ import concurrent.futures
 
 from config.S3Connection import s3_connection
 from config.S3bucketConfig import S3_BUCKET_NAME, S3_BUCKET_REGION
-from controller import Dalle
+from controller import Dalle, handle_exceptions, INPUT_STORY_ERROR
 from tasks import celery
 
 # OpenAI API Key 설정
@@ -34,9 +34,13 @@ output_task_result = Dalle.model('Dalle Output Task Result', {
 class GenerateImage(Resource):
     @Dalle.expect(input_story)
     @Dalle.response(201, 'Success', output_task_id)
+    @handle_exceptions
     def post(self):
         """일기 내용을 요청시 task_id를 응답해 줍니다."""
         story = request.json.get("story")
+        if story == "":
+            raise ValueError(INPUT_STORY_ERROR)
+
         task = celery.send_task('dalle2_ai', kwargs={'story': story, 'api_key': openai.api_key}, queue='dalle_tasks')
         task_id = task.id
         return {"task_id": task_id}
@@ -46,6 +50,7 @@ class GenerateImage(Resource):
 class GetDalleStatus(Resource):
     @Dalle.expect(input_task_id)
     @Dalle.response(200, 'Success', output_task_status)
+    @handle_exceptions
     def post(self):
         """task_id 요청시 task_status를 응답해 줍니다."""
         task_id = request.json.get("task_id")
@@ -57,6 +62,7 @@ class GetDalleStatus(Resource):
 class GetDalleResult(Resource):
     @Dalle.expect(input_task_id)
     @Dalle.response(200, 'Success', output_task_result)
+    @handle_exceptions
     def post(self):
         task_id = request.json.get("task_id")
         image_results = celery.AsyncResult(task_id).result
