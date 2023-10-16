@@ -25,6 +25,7 @@ class GenerateKeyword(Resource):
     @Konlpy.expect(input_story)
     @Konlpy.response(201, 'Success', output_task_id)
     def post(self):
+        """일기 내용을 요청시 task_id를 응답해 줍니다."""
         story = request.json.get('story')
         task = celery.send_task('konlpy_ai', kwargs={'story': story}, queue='konlpy_tasks')
         task_id = task.id
@@ -36,6 +37,7 @@ class GetKonlpyStatus(Resource):
     @Konlpy.expect(input_task_id)
     @Konlpy.response(200, 'Success', output_task_status)
     def post(self):
+        """task_id 요청시 task_status를 응답해 줍니다."""
         task_id = request.json.get("task_id")
         status = celery.AsyncResult(task_id, app=celery)
         return {"status": str(status.state)}
@@ -46,6 +48,7 @@ class GetKonlpyResult(Resource):
     @Konlpy.expect(input_task_id)
     @Konlpy.response(200, 'Success', output_task_result)
     def post(self):
+        """task_id 요청시 task_result를 응답해 줍니다."""
         task_id = request.json.get("task_id")
         diary_keyword = celery.AsyncResult(task_id).result
 
