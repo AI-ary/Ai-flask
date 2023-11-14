@@ -16,6 +16,9 @@ from tasks import celery
 # OpenAI API Key 설정
 openai.api_key = os.getenv('OPEN_AI_KEY')
 
+# s3 클라이언트 생성
+s3_client = s3_connection()
+
 # Swagger model 설정
 input_story = Dalle.model('Dalle Input Story', {'story': fields.String(required=True, description='Diary story')})
 output_task_id = Dalle.inherit('Dalle Output Task ID', {
@@ -37,7 +40,7 @@ class GenerateImage(Resource):
     def post(self):
         """일기 내용을 요청시 task_id를 응답해 줍니다."""
         story = request.json.get("story")
-        task = celery.send_task('dalle2_ai', kwargs={'story': story, 'api_key': openai.api_key}, queue='dalle_tasks')
+        task = celery.send_task('dalle3_ai', kwargs={'story': story, 'api_key': openai.api_key}, queue='dalle_tasks')
         task_id = task.id
         return {"task_id": task_id}
 
@@ -61,7 +64,7 @@ class GetDalleResult(Resource):
         """task_id 요청시 task_result를 응답해 줍니다."""
         task_id = request.json.get("task_id")
         image_results = celery.AsyncResult(task_id).result
-        image_urls = [data['url'] for data in image_results['data']]
+        image_urls = [image_results]
 
         s3_image_urls = []
 
@@ -92,8 +95,6 @@ def upload_image_to_s3(image_url):
         img.save(output, format="WebP", quality=85)
         output.seek(0)
         compressed_image_data = output.read()
-
-    s3_client = s3_connection()
 
     # S3에 업로드
     s3_client.Bucket(S3_BUCKET_NAME).put_object(

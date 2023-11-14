@@ -32,15 +32,18 @@ DRAW_CUTE_CHARACTER = "Please create a clean, simple, and cute illustration that
                       ", ultra-detailed, 8k, " \
                       "realistic drawing, digital art"
 
+translator = Translator()
 
-@celery.task(name='dalle2_ai')
+
+@celery.task(name='dalle3_ai')
 def make_image(story, api_key):
-    openai.api_key = api_key  # 전달된 API 키 설정
-    translator = Translator()
+    openai.api_key = api_key
     story_en = translator.translate(story + DRAW_CUTE_CHARACTER, 'en').text
     response = openai.Image.create(
+        model="dall-e-3",
         prompt=story_en,
-        n=4,
-        size="1024x1024"
+        n=1,
+        size="1024x1024",
+        quality="standard",
     )
-    return response
+    return response.data[0].url
