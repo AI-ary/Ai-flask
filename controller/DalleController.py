@@ -44,7 +44,7 @@ class GenerateImage(Resource):
         if story == "":
             raise ValueError(INPUT_STORY_ERROR)
 
-        task = celery.send_task('dalle2_ai', kwargs={'story': story, 'api_key': openai.api_key}, queue='dalle_tasks')
+        task = celery.send_task('dalle3_ai', kwargs={'story': story, 'api_key': openai.api_key}, queue='dalle_tasks')
         task_id = task.id
         return {"task_id": task_id}
 
