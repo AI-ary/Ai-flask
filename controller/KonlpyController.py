@@ -1,10 +1,9 @@
 from flask import jsonify, request
 
-from controller import Konlpy
+from controller import Konlpy, handle_exceptions, INPUT_STORY_ERROR
 from models.keyword_image import Drawings
 from tasks import celery
 from flask_restx import Resource, fields
-
 # Swagger model 설정
 input_story = Konlpy.model('Konlpy Input story', {'contents': fields.String(required=True, description='Diary story')})
 output_task_id = Konlpy.inherit('Konlpy Output Task ID', {
@@ -24,9 +23,13 @@ class GenerateKeyword(Resource):
 
     @Konlpy.expect(input_story)
     @Konlpy.response(201, 'Success', output_task_id)
+    @handle_exceptions
     def post(self):
         """일기 내용을 요청시 task_id를 응답해 줍니다."""
         story = request.json.get('story')
+        if story == "":
+            raise ValueError(INPUT_STORY_ERROR)
+
         task = celery.send_task('konlpy_ai', kwargs={'story': story}, queue='konlpy_tasks')
         task_id = task.id
         return {"task_id": task_id}
@@ -34,8 +37,10 @@ class GenerateKeyword(Resource):
 
 @Konlpy.route('/status')
 class GetKonlpyStatus(Resource):
+
     @Konlpy.expect(input_task_id)
     @Konlpy.response(200, 'Success', output_task_status)
+    @handle_exceptions
     def post(self):
         """task_id 요청시 task_status를 응답해 줍니다."""
         task_id = request.json.get("task_id")
@@ -45,8 +50,10 @@ class GetKonlpyStatus(Resource):
 
 @Konlpy.route('/result')
 class GetKonlpyResult(Resource):
+
     @Konlpy.expect(input_task_id)
     @Konlpy.response(200, 'Success', output_task_result)
+    @handle_exceptions
     def post(self):
         """task_id 요청시 task_result를 응답해 줍니다."""
         task_id = request.json.get("task_id")
