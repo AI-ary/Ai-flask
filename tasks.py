@@ -28,7 +28,7 @@ def decode(story):
 
 
 # 달리 AI
-DRAW_CUTE_CHARACTER = "Please create a clean, simple, and cute illustration that complements the following diary entry" \
+DRAW_CUTE_CHARACTER = "Please create a clean, simple, and cute illustration" \
                       ", ultra-detailed, 8k, " \
                       "realistic drawing, digital art"
 
